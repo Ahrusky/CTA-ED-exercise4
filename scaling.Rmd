@@ -1,6 +1,6 @@
 ---
 title: "CTA-ED Exercise 4: Scaling techniques"
-author: "[Your full name here]"
+author: "Anne Hruska "
 date: "6/03/2024"
 output: html_document
 ---
@@ -126,7 +126,7 @@ textplot_scale1d(dfm_newstweets_results, margin = "features")
 And we can also look at these features.
 
 ```{r}
-
+#WHAT IS HAPPENING HERE, text not visible, but list of words with avg beta val?
 features <- dfm_newstweets_results[["features"]]
 
 betas <- dfm_newstweets_results[["beta"]]
@@ -173,3 +173,54 @@ dim(kaneko_dfm_study1)
 
 1. Estimate a wordfish model for the @kaneko_estimating_2021 data
 2. Visualize the results
+
+
+1.  Estimate a wordfish model for the @kaneko_estimating_2021 data
+```{r}
+#estimate the Wordfish model for kaneko (theta and std err)
+set.seed(123L)
+kaneko_dfm_study1_results <- textmodel_wordfish(kaneko_dfm_study1, 
+                                             sparse = TRUE)
+#results
+summary(kaneko_dfm_study1_results)
+
+```
+Analysis: 
+Asahi, Chugoku, Chunichi, Hokkaido, Kahoku, Mainichi, and Nishinippon have negative theta values. This means that politically, these might be more liberal(if that is what negative values imply). Nikkei, Sankei, and Yomiuri have positive theta values meaning they may be more conservative. Asahi and Chunichi most neg, Yomiuri most pos. 
+
+2. Visualize the results
+
+```{r}
+#dotplotof the latent thetas (-2 to 2)
+textplot_scale1d(kaneko_dfm_study1_results)
+
+```
+
+
+```{r}
+#plot for features, the word-level betas shows how words are positioned along this dimension, and which words help discriminate between news outlets.
+textplot_scale1d(kaneko_dfm_study1_results, margin = "features")
+
+#list of words with avg beta val
+features <- kaneko_dfm_study1_results[["features"]]
+
+betas <- kaneko_dfm_study1_results[["beta"]]
+
+feat_betas <- as.data.frame(cbind(features, betas))
+feat_betas$betas <- as.numeric(feat_betas$betas)
+
+#visible table of the beta values of the top 20 words
+feat_betas %>%
+  arrange(desc(betas)) %>%
+  top_n(20) %>%
+  mutate(features = cell_spec(features, color = "black"), #make cells specs black (beta and features) why titles not working??
+         betas = cell_spec(betas, color = "black")) %>%
+  kbl(escape = FALSE) %>% # escape = FALSE makes the content in table HTML, 
+  kable_styling(bootstrap_options = "striped")
+
+```
+Analysis:
+The words at the top of the list (国際平和協力, 極小, 世界平和)(trans: International Peace Cooperation ,Minuscule ,World Peace) have the highest beta values suggesting that they are used often in for the newspapers that are on the positive positive end of the wordfish. The prominence of these terms associated with international cooperation and peace in these outlets could show a focus on these themes, or maybe a more internationalist perspective in the wordfish rating?
+
+
+
